@@ -4,6 +4,14 @@ target/
 logs
 ~$*
 *.zip
+*.class
+*.jar
+*.war
+*.log
+*.tmp
+*.bak
+
+copy-test/
 
 ### IntelliJ IDEA ###
 .idea

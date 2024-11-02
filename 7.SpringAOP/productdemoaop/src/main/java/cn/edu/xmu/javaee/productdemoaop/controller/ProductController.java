@@ -57,12 +57,19 @@ public class ProductController {
     public ReturnObject searchProductByName(@RequestParam String name, @RequestParam(required = false, defaultValue = "auto") String type) {
         ReturnObject retObj = null;
         List<Product> productList = null;
-        if (null != type && "manual" == type){
+        if ("manual".equals(type)) {
+            logger.info("manual");
             productList = productService.findProductByName_manual(name);
+        } else if ("join".equals(type)) {
+            logger.info("join");
+            productList = productService.findProductByName_join(name);
+            // System.out.println(productList.get(0).getOnSaleList().get(0).getPrice());
         } else {
+            logger.info("auto");
             productList = productService.retrieveProductByName(name, true);
         }
         List<ProductDto> data = productList.stream().map(o->CloneFactory.copy(new ProductDto(),o)).collect(Collectors.toList());
+        //System.out.println(data.get(0).getPrice());
         retObj = new ReturnObject(data);
         return  retObj;
     }

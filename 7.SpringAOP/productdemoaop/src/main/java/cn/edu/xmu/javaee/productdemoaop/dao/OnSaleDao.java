@@ -6,6 +6,7 @@ import cn.edu.xmu.javaee.productdemoaop.mapper.generator.OnSalePoMapper;
 import cn.edu.xmu.javaee.productdemoaop.mapper.generator.po.OnSalePo;
 import cn.edu.xmu.javaee.productdemoaop.mapper.generator.po.OnSalePoExample;
 import cn.edu.xmu.javaee.productdemoaop.util.CloneFactory;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,16 +18,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Repository
+@RequiredArgsConstructor
 public class OnSaleDao {
 
     private final static Logger logger = LoggerFactory.getLogger(OnSaleDao.class);
 
-    private OnSalePoMapper onSalePoMapper;
+    private final OnSalePoMapper onSalePoMapper;
 
-    @Autowired
-    public OnSaleDao(OnSalePoMapper onSalePoMapper) {
-        this.onSalePoMapper = onSalePoMapper;
-    }
+//    @Autowired
+//    public OnSaleDao(OnSalePoMapper onSalePoMapper) {
+//        this.onSalePoMapper = onSalePoMapper;
+//    }
 
     /**
      * 获得货品的最近的价格和库存

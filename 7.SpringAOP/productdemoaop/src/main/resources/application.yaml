@@ -15,11 +15,14 @@ server:
       min-spare: 50
 
 spring:
+  output:
+    ansi:
+      enabled: always  # 强制启用 ANSI 输出
   datasource:
     #JDBC驱动
     driver-class-name: com.mysql.cj.jdbc.Driver
     #数据库服务器url
-    url: jdbc:mysql://mysql:3306/oomall_demo?serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://116.205.236.233:3306/oomall_demo?serverTimezone=Asia/Shanghai
     #数据库服务器用户名和密码
     username: demouser
     password: 123456

@@ -5,6 +5,7 @@ import cn.edu.xmu.javaee.productdemoaop.mapper.generator.po.ProductPo;
 import cn.edu.xmu.javaee.productdemoaop.util.CloneFactory;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
