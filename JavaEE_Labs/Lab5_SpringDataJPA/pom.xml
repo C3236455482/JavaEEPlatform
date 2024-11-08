@@ -9,9 +9,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>cn.edu.xmu.javaee</groupId>
-    <artifactId>Lab5_SpringDataJPA</artifactId>
+    <artifactId>lab5_springdatajpa</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>Lab5_SpringDataJPA</name>
+    <name>lab5_springdatajpa</name>
     <description> Experiment comparing Spring Data JPA and Mybatis </description>
 
     <properties>
