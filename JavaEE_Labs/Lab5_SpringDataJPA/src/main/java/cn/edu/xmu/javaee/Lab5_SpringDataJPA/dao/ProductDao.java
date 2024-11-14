@@ -313,7 +313,7 @@ public class ProductDao {
             Long goodsId = productJPAPo.getGoodsId();
 
             // 查询并设置关联的 onSale 信息
-            List<OnSaleJPAPo> onSaleList = onSaleRepository.findByProductId(productId);
+            List<OnSaleJPAPo> onSaleList = onSaleRepository.findLatestOnSaleByProductId(productId);
             List<OnSale> onSaleEntities = onSaleList.stream()
                     .map(onSaleJPAPo -> CloneFactory.copy(new OnSale(), onSaleJPAPo))
                     .collect(Collectors.toList());
