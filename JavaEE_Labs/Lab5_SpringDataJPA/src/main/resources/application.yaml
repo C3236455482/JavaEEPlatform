@@ -72,4 +72,15 @@ mybatis:
   configuration:
     #字段名和对象属性用驼峰映射
     map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql: TRACE
+    org.mybatis: DEBUG
+    org.mybatis.spring: DEBUG
+    cn.edu.xmu.javaee.Lab5_SpringDataJPA.mapper: DEBUG  # 替换为你的 Mapper 包路径
+
+
 
