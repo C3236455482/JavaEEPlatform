@@ -32,10 +32,23 @@ public class ProductService {
      * @return 商品对象
      */
     @Transactional(rollbackFor = {BusinessException.class})
+    public Product retrieveProductByIDWithRedis(Long id, boolean all) throws BusinessException {
+        logger.debug("findProductById: id = {}, all = {}", id, all);
+        return productDao.retrieveProductByIDWithRedis(id, all);
+    }
+
+    /**
+     * 获取某个商品信息，仅展示相关内容
+     *
+     * @param id 商品id
+     * @return 商品对象
+     */
+    @Transactional(rollbackFor = {BusinessException.class})
     public Product retrieveProductByID(Long id, boolean all) throws BusinessException {
         logger.debug("findProductById: id = {}, all = {}", id, all);
         return productDao.retrieveProductByID(id, all);
     }
+
 
     /**
      * 用商品名称搜索商品

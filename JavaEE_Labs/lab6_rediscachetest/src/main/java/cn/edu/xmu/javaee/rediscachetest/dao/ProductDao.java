@@ -66,7 +66,7 @@ public class ProductDao {
         for (ProductPo po : productPoList) {
             Product product = null;
             if (all) {
-                product = this.retrieveFullProduct(po);
+                product = this.retrieveFullProductWithRedis(po);
             } else {
                 product = CloneFactory.copy(new Product(), po);
             }
@@ -76,7 +76,41 @@ public class ProductDao {
         return productList;
     }
 
+    /**
+     * 用GoodsPo对象找Goods对象
+     * @param  productId
+     * @return  Goods对象列表，带关联的Product返回
+     */
     public Product retrieveProductByID(Long productId, boolean all) throws BusinessException {
+        Product product = null;
+        ProductPo productPo = productPoMapper.selectByPrimaryKey(productId);
+        if (null == productPo){
+            throw new BusinessException(ReturnNo.RESOURCE_ID_NOTEXIST, "产品id不存在");
+        }
+        if (all) {
+            product = this.retrieveFullProduct(productPo);
+        } else {
+            product = CloneFactory.copy(new Product(), productPo);
+        }
+
+        logger.debug("retrieveProductByID: product = {}",  product);
+        return product;
+    }
+
+
+    private Product retrieveFullProduct(ProductPo productPo) throws DataAccessException{
+        assert productPo != null;
+        Product product =  CloneFactory.copy(new Product(), productPo);
+        List<OnSale> latestOnSale = onSaleDao.getLatestOnSale(productPo.getId());
+        product.setOnSaleList(latestOnSale);
+
+        List<Product> otherProduct = this.retrieveOtherProduct(productPo);
+        product.setOtherProduct(otherProduct);
+
+        return product;
+    }
+
+    public Product retrieveProductByIDWithRedis(Long productId, boolean all) throws BusinessException {
         // 构造 Redis 缓存键
         String productKey = String.format(KEY, productId);
 
@@ -103,7 +137,7 @@ public class ProductDao {
         // 如果需要完整信息，调用 retrieveFullProduct 组装完整信息
         Product product;
         if (all) {
-            product = this.retrieveFullProduct(productPo);
+            product = this.retrieveFullProductWithRedis(productPo);
         } else {
             // 仅需要基本信息
             product = CloneFactory.copy(new Product(), productPo);
@@ -113,7 +147,7 @@ public class ProductDao {
     }
 
 
-    private Product retrieveFullProduct(ProductPo productPo) throws DataAccessException {
+    private Product retrieveFullProductWithRedis(ProductPo productPo) throws DataAccessException {
         assert productPo != null;
 
         // 1. 从 productPo 转换为 Product，保留基本信息
