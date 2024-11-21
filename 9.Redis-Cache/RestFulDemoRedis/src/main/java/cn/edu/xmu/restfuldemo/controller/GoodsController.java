@@ -1,4 +1,4 @@
-package cn.edu.xmu.rocketmqdemo.controller;
+package cn.edu.xmu.restfuldemo.controller;
 
 import cn.edu.xmu.rocketmqdemo.model.GoodsRetVo;
 import cn.edu.xmu.rocketmqdemo.model.GoodsVo;

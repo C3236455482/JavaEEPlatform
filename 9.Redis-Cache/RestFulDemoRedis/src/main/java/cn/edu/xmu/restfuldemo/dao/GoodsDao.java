@@ -2,6 +2,11 @@ package cn.edu.xmu.rocketmqdemo.dao;
 
 import cn.edu.xmu.rocketmqdemo.mapper.GoodsMapper;
 import cn.edu.xmu.rocketmqdemo.model.*;
+import cn.edu.xmu.rocketmqdemo.model.Goods;
+import cn.edu.xmu.rocketmqdemo.model.GoodsPo;
+import cn.edu.xmu.rocketmqdemo.model.PriceStockPo;
+import cn.edu.xmu.rocketmqdemo.model.Product;
+import cn.edu.xmu.rocketmqdemo.model.ProductPo;
 import cn.edu.xmu.rocketmqdemo.util.RedisUtil;
 import cn.edu.xmu.rocketmqdemo.util.ResponseCode;
 import cn.edu.xmu.rocketmqdemo.util.ReturnObject;
