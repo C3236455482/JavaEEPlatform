@@ -13,6 +13,7 @@ logs
 
 # my-test
 copy-test/
+mongo-test/
 
 ### IntelliJ IDEA ###
 .idea
