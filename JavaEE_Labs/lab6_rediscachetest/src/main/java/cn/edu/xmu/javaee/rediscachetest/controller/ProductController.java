@@ -40,9 +40,9 @@ public class ProductController {
         if ("manual".equals(type)) {
             product = productService.findProductById_manual(id);
         } else if ("redis".equals(type)) {
-            product = productService.retrieveProductByIDWithRedis(id, true);
+            product = productService.retrieveProductByIDWithRedis(id, true, true);
         } else if("auto".equals(type)){
-            product = productService.retrieveProductByID(id, true);
+            product = productService.retrieveProductByIDWithRedis(id, true, false);
         }
         ProductDto productDto = CloneFactory.copy(new ProductDto(), product);
         retObj = new ReturnObject(productDto);

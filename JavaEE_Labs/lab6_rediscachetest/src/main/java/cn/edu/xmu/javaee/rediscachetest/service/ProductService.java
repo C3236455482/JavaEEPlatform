@@ -32,9 +32,9 @@ public class ProductService {
      * @return 商品对象
      */
     @Transactional(rollbackFor = {BusinessException.class})
-    public Product retrieveProductByIDWithRedis(Long id, boolean all) throws BusinessException {
-        logger.debug("findProductById: id = {}, all = {}", id, all);
-        return productDao.retrieveProductByIDWithRedis(id, all);
+    public Product retrieveProductByIDWithRedis(Long id, boolean all, boolean useRedis) throws BusinessException {
+        logger.debug("findProductById: id = {}, all = {}, useRedis = {}", id, all, useRedis);
+        return productDao.retrieveProductByIDWithRedis(id, all, useRedis);
     }
 
     /**

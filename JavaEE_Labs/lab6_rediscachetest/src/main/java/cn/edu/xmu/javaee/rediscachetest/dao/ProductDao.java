@@ -66,7 +66,7 @@ public class ProductDao {
         for (ProductPo po : productPoList) {
             Product product = null;
             if (all) {
-                product = this.retrieveFullProductWithRedis(po);
+                product = this.retrieveFullProductWithRedis(po, false);
             } else {
                 product = CloneFactory.copy(new Product(), po);
             }
@@ -110,36 +110,45 @@ public class ProductDao {
         return product;
     }
 
-    public Product retrieveProductByIDWithRedis(Long productId, boolean all) throws BusinessException {
-        // 构造 Redis 缓存键
-        String productKey = String.format(KEY, productId);
+    public Product retrieveProductByIDWithRedis(Long productId, boolean all, boolean useRedis) throws BusinessException {
+        logger.debug("retrieveProductByIDWithRedis: id = {}, all = {}, useRedis = {}", productId, all, useRedis);
 
-        // 从 Redis 获取 Product 的基本信息
-        ProductPo productPo = (ProductPo) redisUtil.get(productKey);
-        if (productPo != null) {
-            // 如果命中缓存且只需要基本信息，直接返回
-            logger.info("Cache hit for product: {}", productKey);
-            if (!all)
-                return CloneFactory.copy(new Product(), productPo);
-        } else {
-            // 如果未命中缓存，或者需要完整信息，则查询数据库
+        ProductPo productPo = null;
+
+        // 如果使用Redis，首先尝试从Redis获取数据
+        if (useRedis) {
+            String productKey = String.format(KEY, productId);
+            productPo = (ProductPo) redisUtil.get(productKey);
+            if (productPo != null) {
+                logger.info("Cache hit for product: {}", productKey);
+                // 如果Redis缓存命中，且只需要基本信息，直接返回
+                if (!all) {
+                    return CloneFactory.copy(new Product(), productPo);
+                }
+            }
+        }
+
+        // 如果没有使用Redis，或者Redis缓存没有命中，查询数据库
+        if (productPo == null) {
             productPo = productPoMapper.selectByPrimaryKey(productId);
-            logger.info("Cache missed for product: {}", productPo);
+            logger.info("Cache missed for product, retrieving from database: {}", productId);
         }
 
         if (productPo == null) {
             throw new BusinessException(ReturnNo.RESOURCE_ID_NOTEXIST, "产品id不存在");
         }
 
-        // 将基本信息存入 Redis 缓存，设置过期时间
-        redisUtil.set(productKey, productPo, 600);
+        // 将基本信息存入 Redis 缓存，如果需要（useRedis为true）
+        if (useRedis) {
+            String productKey = String.format(KEY, productId);
+            redisUtil.set(productKey, productPo, 3600);
+        }
 
-        // 如果需要完整信息，调用 retrieveFullProduct 组装完整信息
+        // 根据是否需要完整信息，决定是否调用 retrieveFullProductWithRedis
         Product product;
         if (all) {
-            product = this.retrieveFullProductWithRedis(productPo);
+            product = this.retrieveFullProductWithRedis(productPo, useRedis);
         } else {
-            // 仅需要基本信息
             product = CloneFactory.copy(new Product(), productPo);
         }
 
@@ -147,7 +156,7 @@ public class ProductDao {
     }
 
 
-    private Product retrieveFullProductWithRedis(ProductPo productPo) throws DataAccessException {
+    private Product retrieveFullProductWithRedis(ProductPo productPo, boolean useRedis) throws DataAccessException {
         assert productPo != null;
 
         // 1. 从 productPo 转换为 Product，保留基本信息
@@ -160,26 +169,38 @@ public class ProductDao {
         String otherProductKey = String.format(OTHER_KEY, productId);
 
         // 2. 获取 OnSale 信息
-        List<OnSale> latestOnSale = (List<OnSale>) redisUtil.get(onSaleKey);
-        if (latestOnSale == null) {
-            // 如果 OnSale 信息不在缓存中，从数据库查询并更新缓存
-            latestOnSale = onSaleDao.getLatestOnSale(productId);
-            logger.info("Cache missed for OnSale: {}", onSaleKey);
-            redisUtil.set(onSaleKey, (Serializable) latestOnSale, 600);
+        List<OnSale> latestOnSale = null;
+        if (useRedis) {
+            latestOnSale = (List<OnSale>) redisUtil.get(onSaleKey);
+            if (latestOnSale == null) {
+                // 如果 OnSale 信息不在缓存中，从数据库查询并更新缓存
+                latestOnSale = onSaleDao.getLatestOnSale(productId);
+                logger.info("Cache missed for OnSale, retrieving from database: {}", onSaleKey);
+                redisUtil.set(onSaleKey, (Serializable) latestOnSale, 3600);  // 缓存600秒
+            } else {
+                logger.info("Cache hit for OnSale: {}", onSaleKey);
+            }
         } else {
-            logger.info("Cache hit for OnSale: {}", onSaleKey);
+            // 如果不使用Redis，直接从数据库查询
+            latestOnSale = onSaleDao.getLatestOnSale(productId);
         }
         product.setOnSaleList(latestOnSale);
 
         // 3. 获取 OtherProduct 信息
-        List<Product> otherProduct = (List<Product>) redisUtil.get(otherProductKey);
-        if (otherProduct == null) {
-            // 如果 OtherProduct 信息不在缓存中，从数据库查询并更新缓存
-            otherProduct = this.retrieveOtherProduct(productPo);
-            logger.info("Cache missed for OtherProduct: {}", otherProductKey);
-            redisUtil.set(otherProductKey, (Serializable) otherProduct, 600);
+        List<Product> otherProduct = null;
+        if (useRedis) {
+            otherProduct = (List<Product>) redisUtil.get(otherProductKey);
+            if (otherProduct == null) {
+                // 如果 OtherProduct 信息不在缓存中，从数据库查询并更新缓存
+                otherProduct = this.retrieveOtherProduct(productPo);
+                logger.info("Cache missed for OtherProduct, retrieving from database: {}", otherProductKey);
+                redisUtil.set(otherProductKey, (Serializable) otherProduct, 3600);  // 缓存600秒
+            } else {
+                logger.info("Cache hit for OtherProduct: {}", otherProductKey);
+            }
         } else {
-            logger.info("Cache hit for OtherProduct: {}", otherProductKey);
+            // 如果不使用Redis，直接从数据库查询
+            otherProduct = this.retrieveOtherProduct(productPo);
         }
         product.setOtherProduct(otherProduct);
 
