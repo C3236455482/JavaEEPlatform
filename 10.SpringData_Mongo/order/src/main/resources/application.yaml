@@ -15,10 +15,15 @@ spring:
       username: demouser
       password: '123456'
       authentication-database: oomall
-      hosts: mongo1:27017,mongo2:27018,mongo3:27019
-      replica-set: rs0
   jackson:
     time-zone: GMT+8
+
+# MongoDB 的副本集配置
+replicaset:
+  mongodb:
+    replica-set: rs0
+    read-preference: nearest
+    hosts: mongo1:27017,mongo1:27017,mongo1:27017
 
 logging:
   level:
